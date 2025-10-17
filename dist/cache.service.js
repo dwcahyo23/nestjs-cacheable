@@ -30,17 +30,18 @@ let CacheService = CacheService_1 = class CacheService {
         if (opts.redisUrl) {
             try {
                 const store = new redis_1.default(opts.redisUrl);
-                this.redisClient = new keyv_1.default({
-                    store,
-                    namespace: (_b = opts.namespace) !== null && _b !== void 0 ? _b : 'nestjs-cacheable',
-                });
+                this.redisClient = new keyv_1.default({ store, namespace: (_b = opts.namespace) !== null && _b !== void 0 ? _b : 'nestjs-cacheable' });
                 this.redisClient.on('error', (err) => {
                     this.logger.warn('Keyv Redis adapter error: ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
                 });
+                this.logger.log(`Redis cache connected at ${opts.redisUrl}`);
             }
             catch (err) {
                 this.logger.warn('Failed to init KeyvRedis: ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
             }
+        }
+        else {
+            this.logger.log('Redis URL not provided, using memory-only cache');
         }
     }
     async get(key) {
@@ -52,11 +53,12 @@ let CacheService = CacheService_1 = class CacheService {
                 const val = await this.redisClient.get(key);
                 if (val !== undefined && val !== null) {
                     await this.memoryCache.set(key, val, this.defaultTTL);
+                    this.logger.debug(`Cache hit in Redis for key ${key}`);
                     return val;
                 }
             }
             catch (err) {
-                this.logger.warn('Redis get failed, fallback to memory. ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
+                this.logger.warn('Redis get failed, fallback to memory: ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
             }
         }
         return null;
@@ -65,6 +67,7 @@ let CacheService = CacheService_1 = class CacheService {
         const useTtl = ttl !== null && ttl !== void 0 ? ttl : this.defaultTTL;
         try {
             await this.memoryCache.set(key, value, useTtl);
+            this.logger.debug(`Cache set in memory for key ${key}`);
         }
         catch (err) {
             this.logger.warn('Memory set failed: ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
@@ -72,9 +75,10 @@ let CacheService = CacheService_1 = class CacheService {
         if (this.redisClient) {
             try {
                 await this.redisClient.set(key, value, useTtl);
+                this.logger.debug(`Cache set in Redis for key ${key}`);
             }
             catch (err) {
-                this.logger.warn('Redis set failed, value saved only to memory. ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
+                this.logger.warn('Redis set failed, value saved only to memory: ' + ((err === null || err === void 0 ? void 0 : err.message) || err));
             }
         }
         if (tags === null || tags === void 0 ? void 0 : tags.length) {
@@ -102,9 +106,7 @@ let CacheService = CacheService_1 = class CacheService {
         }
         for (const [, set] of this.tagMap)
             set.delete(key);
-    }
-    async delete(key) {
-        return this.del(key);
+        this.logger.debug(`Cache deleted for key ${key}`);
     }
     async invalidateTags(tags) {
         for (const tag of tags) {
@@ -115,6 +117,7 @@ let CacheService = CacheService_1 = class CacheService {
                 await this.del(key);
             }
             this.tagMap.delete(tag);
+            this.logger.debug(`Cache invalidated for tag ${tag}`);
         }
     }
     async clear() {
@@ -133,6 +136,7 @@ let CacheService = CacheService_1 = class CacheService {
             }
         }
         this.tagMap.clear();
+        this.logger.log('All cache cleared');
     }
     async onModuleDestroy() {
         await this.clear();

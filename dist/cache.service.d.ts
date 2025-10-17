@@ -11,7 +11,6 @@ export declare class CacheService implements OnModuleDestroy {
     get<T>(key: string): Promise<T | null>;
     set<T>(key: string, value: T, ttl?: number, tags?: string[]): Promise<void>;
     del(key: string): Promise<void>;
-    delete(key: string): Promise<void>;
     invalidateTags(tags: string[]): Promise<void>;
     clear(): Promise<void>;
     onModuleDestroy(): Promise<void>;
