@@ -27,7 +27,7 @@ describe('CacheService', () => {
 
 	it('should support delete alias', async () => {
 		await cacheService.set('key3', { ok: true });
-		await cacheService.delete('key3'); // alias
+		await cacheService.del('key3'); // alias
 		const val = await cacheService.get('key3');
 		expect(val).toBeNull();
 	});
