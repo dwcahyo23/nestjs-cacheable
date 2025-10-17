@@ -43,7 +43,10 @@ let CacheInterceptor = class CacheInterceptor {
             return (0, rxjs_1.of)(cached);
         }
         return next.handle().pipe((0, operators_1.tap)(async (data) => {
-            await this.cacheService.set(key, data, ttl, tags);
+            const exists = await this.cacheService.get(key);
+            if (!exists) {
+                await this.cacheService.set(key, data, ttl, tags);
+            }
         }));
     }
     generateKey(req) {

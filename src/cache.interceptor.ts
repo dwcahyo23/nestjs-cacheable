@@ -77,8 +77,11 @@ export class CacheInterceptor implements NestInterceptor {
 		// Otherwise, execute request and cache result
 		return next.handle().pipe(
 			tap(async (data) => {
-				// `ttl` undefined → CacheService uses default TTL
-				await this.cacheService.set(key, data, ttl, tags);
+				// Cache result only if still missing
+				const exists = await this.cacheService.get(key);
+				if (!exists) {
+					await this.cacheService.set(key, data, ttl, tags);
+				}
 			}),
 		);
 	}
