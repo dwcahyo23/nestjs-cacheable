@@ -1,6 +1,7 @@
 {
-	"name": "nestjs-cacheable",
-	"version": "1.0.0",
+	"name": "@dwcahyo/nestjs-cacheable",
+	"version": "1.0.1",
+	"description": "A lightweight and powerful NestJS caching library with Redis and tag-based invalidation support.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
@@ -9,21 +10,39 @@
 	"scripts": {
 		"build": "tsc",
 		"test": "jest",
-		"test:watch": "jest --watch",
-		"prepublishOnly": "npm run build"
+		"prepare": "npm run build",
+		"prepublishOnly": "npm test"
+	},
+	"keywords": [
+		"nestjs",
+		"cache",
+		"caching",
+		"redis",
+		"keyv",
+		"interceptor",
+		"tag-based-cache",
+		"typescript",
+		"api-performance",
+		"dashboard-cache"
+	],
+	"author": {
+		"name": "Yusuf Dwi Cahyo",
+		"email": "your@email.com",
+		"url": "https://github.com/dwcahyo23"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/dwcahyo23/nestjs-cacheable.git"
+		"url": "https://github.com/dwcahyo23/nestjs-cacheable.git"
 	},
 	"bugs": {
 		"url": "https://github.com/dwcahyo23/nestjs-cacheable/issues"
 	},
 	"homepage": "https://github.com/dwcahyo23/nestjs-cacheable#readme",
-	"keywords": [],
-	"author": "Yusuf Dwi",
 	"license": "MIT",
 	"type": "commonjs",
+	"engines": {
+		"node": ">=16"
+	},
 	"dependencies": {
 		"@keyv/redis": "^5.1.3",
 		"@nestjs/common": "^11.1.6",
@@ -37,5 +56,9 @@
 		"jest": "^30.2.0",
 		"ts-jest": "^29.4.5",
 		"typescript": "^5.9.3"
+	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
 	}
 }

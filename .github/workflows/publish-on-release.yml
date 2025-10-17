@@ -3,11 +3,12 @@ name: Publish to npm
 on:
   push:
     tags:
-      - 'v*.*.*'   # hanya jalan kalau ada tag versi baru (ex: v1.0.1)
+      - 'v*.*.*'   # workflow jalan hanya kalau ada tag versi baru
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -21,10 +22,23 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      - name: Run tests
+        run: npm test
+
       - name: Build
         run: npm run build
 
+      - name: Verify version consistency
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/}
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG_VERSION" != "v$PKG_VERSION" ]; then
+            echo "❌ Tag version ($TAG_VERSION) does not match package.json version (v$PKG_VERSION)"
+            exit 1
+          fi
+          echo "✅ Version check passed: $TAG_VERSION"
+
       - name: Publish to npm
-        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
